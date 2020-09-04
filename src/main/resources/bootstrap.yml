@@ -1,0 +1,21 @@
+server:
+  port: 28080
+spring:
+  application:
+    name: choerodon-todo-service
+  cloud:
+    config:
+      failFast: true
+      retry:
+        maxAttempts: 6
+        multiplier: 1.5
+        maxInterval: 2000
+      uri: localhost:8010
+      enabled: false
+management:
+  server:
+    port: 28081
+  endpoints:
+    web:
+      exposure:
+        include: '*'

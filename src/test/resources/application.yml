@@ -1,0 +1,29 @@
+spring:
+  datasource:
+    password: sa
+    url: jdbc:h2:mem:testdb;DB_CLOSE_DELAY=-1;MODE=Mysql;TRACE_LEVEL_SYSTEM_OUT=2;
+    username: sa
+  autoconfigure:
+    exclude:
+      - org.springframework.boot.autoconfigure.liquibase.LiquibaseAutoConfiguration # 关闭LiquibaseAutoConfiguration
+      - org.springframework.boot.autoconfigure.kafka.KafkaAutoConfiguration # 关闭KafkaAutoConfiguration的自动化配置
+      - org.hzero.boot.admin.AdminRegistrationAutoConfiguration # 关闭服务自动注册到admin
+  h2:
+    console:
+      enabled: true
+  cloud:
+    service-registry:
+      auto-registration:
+        enabled: false   # 关闭自动注册
+mybatis:
+  mapperLocations: classpath*:/mapper/*.xml
+  configuration:
+    mapUnderscoreToCamelCase: true
+
+eureka:
+  client:
+    enabled: false # 关闭eureka
+# liquibase初始化配置
+data:
+  # 选择初始化资源目录
+  dir: src/test/resources
