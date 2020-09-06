@@ -1,6 +1,5 @@
 package io.choerodon.todo.api.controller.v1
 
-
 import io.choerodon.todo.IntegrationTestConfiguration
 import io.choerodon.todo.app.service.UserService
 import io.choerodon.todo.infra.dto.UserDTO
@@ -29,13 +28,12 @@ class UserControllerSpec extends Specification {
 
     @Autowired
     UserService userService
-
-    UserMapper userMapper = Mock();
+    @Autowired
+    UserMapper userMapper
 
     DevopsFeignClient devopsFeignClient = Mock();
 
     def setup() {
-        ReflectionTestUtils.setField(userService, "userMapper", userMapper)
         ReflectionTestUtils.setField(userService, "devopsFeignClient", devopsFeignClient)
     }
 
@@ -45,12 +43,18 @@ class UserControllerSpec extends Specification {
         userDto.setEmail("test@hand.com")
         userDto.setEmployeeName("lisi")
         userDto.setEmployeeNumber("001")
+
         when: "新建用户"
         def entity = testRestTemplate.postForEntity(BASE_URL, userDto, UserDTO.class)
+
         then: "校验参数"
         entity.statusCode.is2xxSuccessful()
         entity.getBody().getEmployeeName() == userDto.getEmployeeName()
         entity.getBody().getId() != null
+
+        cleanup: "清除数据"
+        // 为了不影响其他单元测试结果，需要在测试结束时删除插入的数据
+        userMapper.deleteByPrimaryKey(entity.getBody().getId())
 
     }
 
@@ -72,46 +76,11 @@ class UserControllerSpec extends Specification {
         entity1.body == true
 
         when: "校验邮箱是否被使用"
-        def entity2 = testRestTemplate.getForEntity(BASE_URL + "/check_email_exist", email, Boolean.class)
+        def entity2 = testRestTemplate.getForEntity(BASE_URL + "/check_email_exist?email={email}", Boolean.class, email)
         then: "校验结果 - 邮箱未使用"
         entity2.statusCode.is2xxSuccessful()
         entity2.body == false
 
-    }
-
-    /**
-     * 测试mock 预期的方法调用次数
-     * @return
-     */
-    def "queryById"() {
-        given: "构造参数"
-        def userId = 1
-        when: "根据id查询用户"
-        def entity1 = testRestTemplate.getForEntity(BASE_URL + "/{userId}", UserDTO.class, userId)
-        then: "校验结果"
-        entity1.statusCode.is2xxSuccessful()
-        1 * userMapper.selectByPrimaryKey(_)
-    }
-
-
-    /**
-     * 测试mock 模拟返回值以及预期的方法调用次数
-     * @return
-     */
-    def "queryById2"() {
-        given: "构造参数"
-        def userId = 1
-        def userDto = new UserDTO()
-        userDto.setEmail("test@hand.com")
-        userDto.setEmployeeName("lisi")
-        userDto.setEmployeeNumber("001")
-        userDto.setId(1)
-        when: "根据id查询用户"
-        def entity1 = testRestTemplate.getForEntity(BASE_URL + "/{userId}", UserDTO.class, userId)
-        then: "校验结果"
-        entity1.statusCode.is2xxSuccessful()
-        // 执行一次，并且执行时返回userDto
-        1 * userMapper.selectByPrimaryKey(_) >> userDto
     }
 
 }

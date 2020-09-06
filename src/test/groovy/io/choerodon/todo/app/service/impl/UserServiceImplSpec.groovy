@@ -44,6 +44,6 @@ class UserServiceImplSpec extends Specification {
         def userDto = userService.queryById(1)
         then: "校验结果"
         notThrown(CommonException)
-        userDto == null
+        userDto != null
     }
 }
