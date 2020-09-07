@@ -31,7 +31,7 @@ class UserControllerSpec extends Specification {
     @Autowired
     UserMapper userMapper
 
-    DevopsFeignClient devopsFeignClient = Mock();
+    DevopsFeignClient devopsFeignClient = Stub()
 
     def setup() {
         ReflectionTestUtils.setField(userService, "devopsFeignClient", devopsFeignClient)
@@ -55,7 +55,6 @@ class UserControllerSpec extends Specification {
         cleanup: "清除数据"
         // 为了不影响其他单元测试结果，需要在测试结束时删除插入的数据
         userMapper.deleteByPrimaryKey(entity.getBody().getId())
-
     }
 
     /**
