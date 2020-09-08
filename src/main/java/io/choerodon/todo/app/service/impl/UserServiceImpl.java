@@ -35,6 +35,13 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
+    public Boolean checkEmailExistInGitlab(String email) {
+        // 校验email在gitlab中是否已经使用
+        ResponseEntity<Boolean> responseEntity = devopsFeignClient.checkGitlabEmail(email);
+        return responseEntity.getBody();
+    }
+
+    @Override
     public Boolean checkEmailExist(String email) {
         // 校验email在gitlab中是否已经使用
         ResponseEntity<Boolean> responseEntity = devopsFeignClient.checkGitlabEmail(email);

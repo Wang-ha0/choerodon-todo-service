@@ -12,6 +12,8 @@ import io.choerodon.todo.infra.dto.UserDTO;
 public interface UserService {
     UserDTO createOne(UserDTO userDTO);
 
+    Boolean checkEmailExistInGitlab(String email);
+
     Boolean checkEmailExist(String email);
 
     UserDTO queryById(Long id);

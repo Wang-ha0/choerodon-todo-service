@@ -303,7 +303,6 @@
                 <executions>
                     <execution>
                         <goals>
-                            <goal>addTestSources</goal>
                             <goal>compileTests</goal>
                         </goals>
                     </execution>

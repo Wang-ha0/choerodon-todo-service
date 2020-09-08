@@ -27,14 +27,12 @@ class UserControllerSpec extends Specification {
     TestRestTemplate testRestTemplate;
 
     @Autowired
-    UserService userService
-    @Autowired
-    UserMapper userMapper
+    UserController userController
 
-    DevopsFeignClient devopsFeignClient = Stub()
+    UserService userService = Mock()
 
     def setup() {
-        ReflectionTestUtils.setField(userService, "devopsFeignClient", devopsFeignClient)
+        ReflectionTestUtils.setField(userController, "userService", userService)
     }
 
     def "create"() {
@@ -49,37 +47,34 @@ class UserControllerSpec extends Specification {
 
         then: "校验参数"
         entity.statusCode.is2xxSuccessful()
-        entity.getBody().getEmployeeName() == userDto.getEmployeeName()
-        entity.getBody().getId() != null
-
-        cleanup: "清除数据"
-        // 为了不影响其他单元测试结果，需要在测试结束时删除插入的数据
-        userMapper.deleteByPrimaryKey(entity.getBody().getId())
+        1 * userService.createOne(_)
     }
 
-    /**
-     * 测试 连续调用时返回不同的值
-     * @return
-     */
+
     def "check_email_exist"() {
         given: "构造参数"
         def email = "test@hand.com"
-        ResponseEntity<Boolean> responseEntity1 = new ResponseEntity<>(true, HttpStatus.OK)
-        ResponseEntity<Boolean> responseEntity2 = new ResponseEntity<>(false, HttpStatus.OK)
-        devopsFeignClient.checkGitlabEmail(_ as String) >>> [responseEntity1, responseEntity2]
 
         when: "校验邮箱是否被使用"
         def entity1 = testRestTemplate.getForEntity(BASE_URL + "/check_email_exist?email={email}", Boolean.class, email)
-        then: "校验结果 - 邮箱已使用"
-        entity1.statusCode.is2xxSuccessful()
-        entity1.body == true
 
-        when: "校验邮箱是否被使用"
-        def entity2 = testRestTemplate.getForEntity(BASE_URL + "/check_email_exist?email={email}", Boolean.class, email)
-        then: "校验结果 - 邮箱未使用"
-        entity2.statusCode.is2xxSuccessful()
-        entity2.body == false
+        then: "校验结果"
+        entity1.statusCode.is2xxSuccessful()
+        1 * userService.checkEmailExist(_)
 
     }
+
+    def "queryById"() {
+        given: "构造参数"
+        def userId = 1L
+
+        when: "根据id查询用户"
+        def entity1 = testRestTemplate.getForEntity(BASE_URL + "/{userId}", UserDTO.class, userId)
+
+        then: "校验结果"
+        entity1.statusCode.is2xxSuccessful()
+        1 * userService.queryById(_)
+    }
+
 
 }
